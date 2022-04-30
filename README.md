@@ -23,13 +23,6 @@
     > > project_name: '**super_lists**'  
  name
     > > repo_url: '**https://github.com/jingwangnet/2022-super-list.git**'
-3. 设置 django **SECRET_KEY** 并加密
-    >  `cp secrets.yml.example secrets.yml`  
-    >   
-    >  `vim sercrets.yml`
-    > > SECRET_KEY: '**ed3dd0bbb27c572c678ee07113c7939ea**'   
-    > 
-    > `ansible-vault encrypt secrets.yml`
 
 ## 安装
 `ansible-play deployment.yml`

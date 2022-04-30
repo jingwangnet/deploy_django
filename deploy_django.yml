@@ -4,7 +4,6 @@
   vars_files:
     - vars/main.yml
     - vars/custom.yml
-    - vars/secrets.yml
   tasks:
     - name: Installing Apps
       become: True
@@ -45,11 +44,15 @@
             regex: '^ALLOWED_HOSTS = \[\]'
             line: "ALLOWED_HOSTS = ['localhost', '{{ ansible_ssh_host }}']"
 
+        - name: Create secret key
+          command: "python3 -c 'import secrets; print(secrets.token_hex())'"
+          register: result 
+
         - name: Update secret key
           lineinfile:
             path: '{{ settings_file }}'
             regex: '^SECRET_KEY = (.*)$'
-            line: "SECRET_KEY = '{{ SECRET_KEY }}'"
+            line: "SECRET_KEY = '{{ result.stdout }}'"
 
         - name: Update database path
           lineinfile: 
