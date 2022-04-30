@@ -27,7 +27,7 @@
     >  `cp secrets.yml.example secrets.yml`  
     >   
     >  `vim sercrets.yml`
-    > > SECRET_KEY='**ed3dd0bbb27c572c678ee07113c7939ea**'   
+    > > SECRET_KEY: '**ed3dd0bbb27c572c678ee07113c7939ea**'   
     > 
     > `ansible-vault encrypt secrets.yml`
 
