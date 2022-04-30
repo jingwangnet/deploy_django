@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn server for {{ project_name }}
+
+[Service]
+Restart=on-failure
+User= {{ ansible_ssh_user }}
+WorkingDirectory={{ source_dir }}
+ExecStart={{ virtualenv_dir }}/bin/gunicorn \
+     --bind unix:/tmp/{{ project_name }}.socket \
+     {{ project_name }}.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

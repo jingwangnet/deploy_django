@@ -1,0 +1,162 @@
+---
+- name: Deploy django with nginx
+  hosts: all
+  vars_files:
+    - vars/main.yml
+    - vars/custom.yml
+    - vars/secrets.yml
+  tasks:
+    - name: Installing Apps
+      become: True
+      apt: 
+        name: '{{ item }}' 
+      loop: '{{ apps }}'
+
+    - name: Make dir for Database , static fiels , virtualenv and source
+      file: 
+        path: '{{ item }}'
+        state: directory
+      loop: '{{ dirs }}'
+
+    - name: Pulling source from github
+      git:
+        repo: '{{ repo_url }}'
+        dest: '{{ source_dir }}' 
+        force: True
+      notify: Restart gunicorn
+
+    - name: Insall python packages
+      pip: 
+        requirements: '{{ requirements_file }}'
+        virtualenv: '{{ virtualenv_dir }}'
+        extra_args: -i https://pypi.tuna.tsinghua.edu.cn/simple some-package
+
+    - name: Config django
+      block: 
+        - name: Disable DEBUG
+          lineinfile: 
+            path: '{{ settings_file }}'
+            regex: '^DEBUG = True'
+            line: 'DEBUG = False'
+
+        - name: add domain 
+          lineinfile: 
+            path: '{{ settings_file }}'
+            regex: '^ALLOWED_HOSTS = \[\]'
+            line: "ALLOWED_HOSTS = ['localhost', '{{ ansible_ssh_host }}']"
+
+        - name: Update secret key
+          lineinfile:
+            path: '{{ settings_file }}'
+            regex: '^SECRET_KEY = (.*)$'
+            line: "SECRET_KEY = '{{ SECRET_KEY }}'"
+
+        - name: Update database path
+          lineinfile: 
+            path: '{{ settings_file }}'
+            regex: "'NAME': BASE_DIR / 'db.sqlite3',"
+            line: "'NAME': BASE_DIR / '..' / 'static' / 'db.sqlite3'"
+
+        - name: Add STATIC_ROOT path
+          lineinfile: 
+            path: '{{ settings_file }}'
+            insertafter: "^STATIC_URL = '/static/'" 
+            line: "STATIC_ROOT = BASE_DIR / '..' / 'static'"
+
+
+    - name: Django intial database and sync staticfiels
+      block: 
+        - name: Django initial database
+          community.general.django_manage:
+            command: migrate
+            project_path: '{{ source_dir }}'
+            virtualenv: '{{ virtualenv_dir }}'
+
+        - name: SASS compile CSS
+          block: 
+            - name: Npm install install dependce
+              community.general.npm:
+                path: '{{ source_dir }}/static/'
+
+
+            - name: Npm install scss
+              community.general.npm:
+                name: sass
+                global: yes
+              become: True
+
+            - name: compile CSS
+              command: 'sass {{ scss_dir }}:{{ css_dir }}'
+
+
+        - name: Django collect staticfiels
+          community.general.django_manage:
+            command: collectstatic
+            project_path: "{{ source_dir }}"
+            virtualenv: '{{ virtualenv_dir }}'
+
+    - name: Add nginx config
+      block:
+        - name: Add config to site-availabe
+          template:
+            src: ./templates/nginx.conf.j2
+            dest: '/etc/nginx/sites-available/{{ project_name }}.conf'
+          become: True
+          notify: Restart nginx
+
+
+        - name: link config to sites-enabled form sites-available
+          file: 
+            src: '/etc/nginx/sites-available/{{ project_name }}.conf'
+            dest: '/etc/nginx/sites-enabled/{{ project_name }}.conf'
+            state: link
+          become: True
+          notify: Restart nginx
+
+    - name: Write gunicorn service script
+      template: 
+        src:  ./templates/gunicorn.service.j2
+        dest: '/etc/systemd/system/gunicorn-{{ project_name }}.service'
+      become: True
+      notify: Restart gunicorn
+
+  handlers:
+    - name: Restart nginx
+      systemd: 
+        state: restarted
+        name: nginx
+      become: True
+
+    - name: Restart gunicorn
+      systemd: 
+        daemon_reload: True
+        enabled: True
+        state: restarted
+        name: 'gunicorn-{{ project_name }}'
+      become: True
+
+- name: Test Deploy
+  hosts: all
+  tasks:
+    - name: Visits the web
+      uri: 
+        url: "http://{{ ansible_ssh_host }}"
+        status_code: 200
+        return_content: True
+      register: result
+
+    - name: show the result
+      debug: 
+        msg: '{{  result.url }} {{ result.status }} '
+
+
+
+
+
+
+
+
+
+
+
+

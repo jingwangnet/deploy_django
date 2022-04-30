@@ -1,0 +1,16 @@
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name {{ ansible_ssh_host }};
+
+
+    location /static {
+        alias  {{ static_dir }};
+    }
+
+    location / {
+        proxy_pass http://unix:/tmp/{{ project_name }}.socket;
+    }
+}

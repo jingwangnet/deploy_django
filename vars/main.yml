@@ -1,0 +1,28 @@
+---
+site_dir: '{{ ansible_facts.user_dir }}/site'
+host_dir: '{{ site_dir }}/{{ project_name }}'
+source_dir: '{{ host_dir }}/source'
+database_dir: '{{ host_dir }}/database'
+static_dir: '{{ host_dir }}/static'
+virtualenv_dir: '{{ host_dir }}/virtualenv'
+
+scss_dir: '{{ source_dir }}/static/scss'
+css_dir: '{{ source_dir }}/static/css'
+
+settings_file: '{{ source_dir }}/{{ project_name }}/settings.py'
+requirements_file: '{{ source_dir }}/requirements.txt'
+
+apps: 
+  - python3-pip
+  - python3-virtualenv
+  - npm 
+  - git 
+  - nginx 
+
+dirs: 
+  - '{{ site_dir }}'
+  - '{{ host_dir }}'
+  - '{{ source_dir }}'
+  - '{{ database_dir }}'
+  - '{{ static_dir }}'
+  - '{{ virtualenv_dir }}'
