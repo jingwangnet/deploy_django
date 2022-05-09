@@ -14,9 +14,9 @@
     > `cp hosts.example hosts`  
     >   
     > `vim hosts`   
-    > > stage ansible_ssh_host=**192.168.31.52.nip.io** ansible_ssh_port=22 ansible_ssh_user=jingwang
+    > > stage ansible_ssh_host=**192.168.31.52** ansible_ssh_port=22 ansible_ssh_user=jingwang
     >
-    >  **ansible_ssh_host** 用于 nginx **server_name**
+    >  **server_name** 用于 nginx **server_name**
 2. 设置 `project_name` 和 `repo_url`
     > `vim  vars/custom.yml`
     > 
