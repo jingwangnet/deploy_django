@@ -42,7 +42,7 @@
           lineinfile: 
             path: '{{ settings_file }}'
             regex: '^ALLOWED_HOSTS = \[\]'
-            line: "ALLOWED_HOSTS = ['localhost', '{{ ansible_ssh_host }}']"
+            line: "ALLOWED_HOSTS = ['localhost', '{{ server_name }}']"
 
         - name: Create secret key
           command: "python3 -c 'import secrets; print(secrets.token_hex())'"
