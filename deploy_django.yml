@@ -58,7 +58,7 @@
           lineinfile: 
             path: '{{ settings_file }}'
             regex: "'NAME': BASE_DIR / 'db.sqlite3',"
-            line: "'NAME': BASE_DIR / '..' / 'static' / 'db.sqlite3'"
+            line: "'NAME': BASE_DIR / '..' / 'database' / 'db.sqlite3'"
 
         - name: Add STATIC_ROOT path
           lineinfile: 
@@ -140,6 +140,9 @@
 
 - name: Test Deploy
   hosts: all
+  vars_files:
+    - vars/main.yml
+    - vars/custom.yml
   tasks:
     - name: Visits the web
       uri: 
