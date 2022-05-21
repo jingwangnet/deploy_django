@@ -1,0 +1,58 @@
+--- 
+- name: Deploy cloudflare tunnel
+  hosts: all
+  vars_files: 
+    - vars/main.yml
+    - vars/custom.yml
+
+  tasks:
+    - name: Add port to listen static path in nginx
+      become: True
+      lineinfile: 
+        path: '/etc/nginx/sites-available/{{ project_name }}.conf'
+        regex: "(\\s+)listen 80;"
+        line: "\\1listen 8080;"
+        backrefs: True
+      notify: Restart nginx
+        
+    - name: Add cloudflare tunnel domain to ALLOW_HOSTS
+      lineinfile: 
+        path: '{{ settings_file }}'
+        regex: "^(ALLOWED_HOSTS) = \\[('localhost'), ('{{ server_name }}')\\]"
+        line: "\\1 = [\\2, \\3, '{{ cloudflare_server_name }}']"
+        backrefs: True
+      notify: Restart gunicorn
+
+  handlers:
+    - name: Restart nginx
+      systemd: 
+        state: restarted
+        name: nginx
+      become: True
+
+    - name: Restart gunicorn
+      systemd: 
+        daemon_reload: True
+        enabled: True
+        state: restarted
+        name: 'gunicorn-{{ project_name }}'
+      become: True
+
+- name: Test Deploy
+  hosts: all
+  vars_files:
+    - vars/main.yml
+    - vars/custom.yml
+  tasks:
+    - name: Visits the web
+      uri: 
+        url: "https://{{ cloudflare_server_name }}"
+        status_code: 200
+        return_content: True
+      register: result
+
+    - name: show the result
+      debug: 
+        msg: '{{  result.url }} {{ result.status }} '
+
+
