@@ -7,6 +7,9 @@ User= {{ ansible_ssh_user }}
 WorkingDirectory={{ source_dir }}
 ExecStart={{ virtualenv_dir }}/bin/gunicorn \
      --bind unix:/tmp/{{ project_name }}.socket \
+     --capture-output \
+     --access-logfile ../access.log \
+     --error-logfile ../error.log \
      {{ project_name }}.wsgi:application
 
 [Install]
