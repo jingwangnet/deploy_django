@@ -4,6 +4,7 @@ Description=Gunicorn server for {{ project_name }}
 [Service]
 Restart=on-failure
 User= {{ ansible_ssh_user }}
+Environment=EMAIL_PASSWORD={{ EMAIL_PASSWORD }}
 WorkingDirectory={{ source_dir }}
 ExecStart={{ virtualenv_dir }}/bin/gunicorn \
      --bind unix:/tmp/{{ project_name }}.socket \
