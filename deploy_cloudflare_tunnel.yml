@@ -23,14 +23,6 @@
         backrefs: True
       notify: Restart gunicorn
 
-    - name: replace https from http in functional test
-      lineinfile: 
-        path: '{{ source_dir }}/functional_tests/base.py'
-        regex: "(.*)(http://)(.*)"
-        line: "\\1https://\\3"
-        backrefs: True
-      notify: Restart nginx
-
   handlers:
     - name: Restart nginx
       systemd: 
