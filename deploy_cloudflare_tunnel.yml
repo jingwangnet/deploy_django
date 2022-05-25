@@ -18,8 +18,8 @@
     - name: Add cloudflare tunnel domain to ALLOW_HOSTS
       lineinfile: 
         path: '{{ settings_file }}'
-        regex: "^(ALLOWED_HOSTS) = \\[('{{ server_name }}')\\]"
-        line: "\\1 = [\\2, '{{ cloudflare_server_name }}']"
+        regex: "^(ALLOWED_HOSTS) = \\[('localhost'), ('{{ server_name }}')\\]"
+        line: "\\1 = [\\2, \\3, '{{ cloudflare_server_name }}']"
         backrefs: True
       notify: Restart gunicorn
 

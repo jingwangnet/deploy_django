@@ -43,7 +43,7 @@
           lineinfile: 
             path: '{{ settings_file }}'
             regex: '^ALLOWED_HOSTS = \[\]'
-            line: "ALLOWED_HOSTS = ['{{ server_name }}']"
+            line: "ALLOWED_HOSTS = ['localhost', '{{ server_name }}']"
 
         - name: Create secret key
           command: "python3 -c 'import secrets; print(secrets.token_hex())'"
