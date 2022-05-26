@@ -89,14 +89,29 @@
                  'root': {'level': 'INFO'},
               }
 
-    - name: Django intial database and sync staticfiels
+    - name: Django intial database 
       block: 
         - name: Django initial database
           community.general.django_manage:
             command: migrate
             project_path: '{{ source_dir }}'
             virtualenv: '{{ virtualenv_dir }}'
+      rescue:
+        - name: flush database
+          community.general.django_manage:
+            command: "flush --noinput"
+            project_path: '{{ source_dir }}'
+            virtualenv: '{{ virtualenv_dir }}'
 
+        - name: Django initial database
+          community.general.django_manage:
+            command: migrate
+            project_path: '{{ source_dir }}'
+            virtualenv: '{{ virtualenv_dir }}'
+
+
+    - name: Django sync staticfiels
+      block: 
         - name: SASS compile CSS
           block: 
             - name: Npm install install dependce
